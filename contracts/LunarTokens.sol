@@ -45,6 +45,17 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
         _safeMint(to, tokenId);
     }
 
+    function mintSpecial(address to, uint256 specialTypeId) public onlyOwner {
+        require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
+
+         uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(to, tokenId);
+
+        isSpecial[tokenId] = true;
+        tokenIdToSpecialTypeId[tokenId] = specialTypeId;
+    }
+
     // The following functions are overrides required by Solidity.
 
     function _beforeTokenTransfer(
