@@ -3,6 +3,7 @@ import { ethers } from "hardhat";
 
 describe("Lunar", async function () {
     let lunar: any;
+    let currentPhase: string;
 
     it("simple test", async function () {
         lunar = await ethers.deployContract("Lunar");
@@ -10,13 +11,11 @@ describe("Lunar", async function () {
         const lunarAddress = await lunar.getAddress();
         console.log(`Lunar deployed to: ${lunarAddress}`)
 
-        const currentPhase: string = await lunar.currentPhase();
+        currentPhase = await lunar.currentPhase();
         console.log(`Current phase:     ${currentPhase}`);
 
         const currentFraction: bigint = await lunar.currentFrac();
         console.log(`Current fraction:  ${currentFraction}`);
-
-
     });
 
     it("NFT Contract", async function () {
@@ -38,8 +37,12 @@ describe("Lunar", async function () {
 
         await nftContract.safeMint(owner);
         const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 0);
+        expect(tokenId).to.equal(0);
 
         const tokenURI = await nftContract.tokenURI(tokenId);
         console.log(`Token URI: ${tokenURI}`);
+
+        const expectedURI = `${prefix}${currentPhase.replace(` `, `_`)}${postfix}`;
+        expect(tokenURI).to.equal(expectedURI);
     })
 });
