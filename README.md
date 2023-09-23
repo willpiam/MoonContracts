@@ -1,13 +1,5 @@
-# Sample Hardhat Project
+# William Doyle's Lunar Contracts 
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+## Description
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+This is an NFT project all about the moon. Each token will display the current phase of the moon based on ON CHAIN data. 

@@ -37,7 +37,7 @@ describe("Lunar", async function () {
         owner = await nftContract.owner();
         console.log(`NFT Contract owner: ${owner}`);
 
-        await nftContract.safeMint(owner);
+        await nftContract.mint(owner, 0);
         const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 0);
         expect(tokenId).to.equal(0);
 
@@ -51,7 +51,7 @@ describe("Lunar", async function () {
     it("NFT Contract - Create a special type", async function () {
         const prefix = "https://williamdoyle.ca/lunar-tokens/psychedelic-version/";
         const postfix = ".json";
-        await nftContract.createSpecialType(0, [
+        await nftContract.createSpecialType([
             `${prefix}New_Moon${postfix}`,
             `${prefix}Waxing_Crescent${postfix}`,
             `${prefix}First_Quarter${postfix}`,
@@ -62,9 +62,34 @@ describe("Lunar", async function () {
             `${prefix}Waning_Crescent${postfix}`,
         ])
 
-        await nftContract.mintSpecial(owner, 0);
+        await nftContract.mint(owner, 1);
         const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 1);
         expect(tokenId).to.equal(1);
+
+        const tokenURI = await nftContract.tokenURI(tokenId);
+        console.log(`Token URI: ${tokenURI}`);
+
+        const expectedURI = `${prefix}${currentPhase.replace(` `, `_`)}${postfix}`;
+        expect(tokenURI).to.equal(expectedURI);
+    })
+
+    it("NFT Contract - Create another special type", async function () {
+        const prefix = "https://williamdoyle.ca/lunar-tokens/minimalist-version/";
+        const postfix = ".json";
+        await nftContract.createSpecialType([
+            `${prefix}New_Moon${postfix}`,
+            `${prefix}Waxing_Crescent${postfix}`,
+            `${prefix}First_Quarter${postfix}`,
+            `${prefix}Waxing_Gibbous${postfix}`,
+            `${prefix}Full_Moon${postfix}`,
+            `${prefix}Waning_Gibbous${postfix}`,
+            `${prefix}Last_Quarter${postfix}`,
+            `${prefix}Waning_Crescent${postfix}`,
+        ])
+
+        await nftContract.mint(owner, 2);
+        const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 2);
+        expect(tokenId).to.equal(2);
 
         const tokenURI = await nftContract.tokenURI(tokenId);
         console.log(`Token URI: ${tokenURI}`);
