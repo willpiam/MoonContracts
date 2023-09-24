@@ -6,6 +6,7 @@ describe("Lunar", async () => {
     let currentPhase: string;
     let nftContract: any;
     let owner: any;
+    const paymentAccount = ethers.Wallet.createRandom();
 
     it("simple test", async () => {
         lunar = await ethers.deployContract("Lunar");
@@ -38,7 +39,8 @@ describe("Lunar", async () => {
                 `${prefix}Last_Quarter${postfix}`,
                 `${prefix}Waning_Crescent${postfix}`,
             ],
-            ethers.parseEther("1")
+            ethers.parseEther("1"),
+            paymentAccount.address,
         ]);
 
         owner = await nftContract.owner();
@@ -55,7 +57,6 @@ describe("Lunar", async () => {
 
         const expectedURI = `${prefix}${currentPhase.replace(` `, `_`)}${postfix}`;
         expect(tokenURI).to.equal(expectedURI);
-
     })
 
     it("NFT Contract - Create a special type", async () => {
@@ -124,7 +125,13 @@ describe("Lunar", async () => {
 
     })
 
-    it.skip("Owner can change price", async () => {
+    it.skip("Payment address can withdraw funds", async () => {
 
     })
+
+    it.skip("Owner can change price and payment address", async () => {
+
+    })
+
+
 });

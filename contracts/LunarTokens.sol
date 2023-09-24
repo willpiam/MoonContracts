@@ -7,11 +7,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-// pull payments
 import "@openzeppelin/contracts/security/PullPayment.sol";
 import "./ILunar.sol";
 
-contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
+contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullPayment {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
@@ -26,14 +25,17 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
     mapping(uint256 => uint256) private specialTypeIdToSupply; 
     mapping(uint256 => uint256) private specialTypeIdToAmountMinted;
 
-    uint256 private timestampOfLastMint;
+    address private paymentAddress;
 
     constructor(
         ILunar _lunaSource,
         string[] memory uris,
-        uint256 standardPrice
+        uint256 standardPrice,
+        address _paymentAddress
     ) ERC721("Magic Moons", "MMOON") {
         lunar = _lunaSource;
+
+        paymentAddress = _paymentAddress;
 
         createSpecialType(uris, standardPrice, 100_000); // make specialTypeIdToSpecialPhaseURIs[0] the default type
     }
@@ -41,6 +43,10 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
     function changePrice(uint256 specialTypeId, uint256 newPrice) public onlyOwner {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
         specialTypeIdToPrice[specialTypeId] = newPrice;
+    }
+
+    function changePaymentAddress(address newPaymentAddress) public onlyOwner {
+        paymentAddress = newPaymentAddress;
     }
 
     function mint(address to, uint256 specialTypeId) public payable {
@@ -56,7 +62,8 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
         specialTypeIdToAmountMinted[specialTypeId]++;
 
         _safeMint(to, tokenId);
-        timestampOfLastMint = block.timestamp;
+
+        _asyncTransfer(paymentAddress, specialTypeIdToPrice[specialTypeId]); // pay for minting
     }
 
     // The following functions are overrides required by Solidity.
