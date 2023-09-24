@@ -130,8 +130,19 @@ describe("Lunar", async () => {
         expect(nftContract.mint(owner, 2, { value: ethers.parseEther("3") })).to.be.revertedWith("Supply of this type has been exhausted")
     })
 
-    it.skip("Payment address can withdraw funds", async () => {
+    it("Payment address can withdraw funds", async () => {
+        const balanceOwed = await nftContract.payments(paymentAccount.address);
+        console.log(`Balance owed: ${balanceOwed}`);
 
+        const balanceBefore = await ethers.provider.getBalance(paymentAccount.address);
+        console.log(`Balance before: ${balanceBefore}`);
+
+        await nftContract.withdrawPayments(paymentAccount.address);
+
+        const balanceAfter = await ethers.provider.getBalance(paymentAccount.address);
+        console.log(`Balance after: ${balanceAfter}`);
+
+        expect(balanceAfter).to.be.gt(balanceBefore);
     })
 
     it.skip("Owner can change price and payment address or even the lunar data source contract", async () => {
