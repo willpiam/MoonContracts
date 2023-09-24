@@ -20,26 +20,31 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
     mapping(uint256 => uint256) private tokenIdToSpecialTypeId;
     mapping(uint256 => mapping(string => string)) private specialTypeIdToSpecialPhaseURIs;
     mapping(uint256 => bool) private isValidSpecialTypeId;
+    mapping(uint256 => uint256) private specialTypeIdToPrice; 
+
+    uint256 private timestampOfLastMint;
 
     constructor(
         ILunar _lunaSource,
-        string[] memory uris
+        string[] memory uris,
+        uint256 standardPrice
     ) ERC721("Magic Moons", "MMOON") {
         lunar = _lunaSource;
 
-        createSpecialType(uris); // make specialTypeIdToSpecialPhaseURIs[0] the default type
+        createSpecialType(uris, standardPrice); // make specialTypeIdToSpecialPhaseURIs[0] the default type
     }
 
-    function mint(address to, uint256 specialTypeId) public onlyOwner {
+    function mint(address to, uint256 specialTypeId) public payable onlyOwner {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
         // require(Strings.equal(lunar.currentPhase(), "Full Moon"), "You can only mint under a Full Moon"); // for later  
-        
+
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
 
         tokenIdToSpecialTypeId[tokenId] = specialTypeId;
 
         _safeMint(to, tokenId);
+        timestampOfLastMint = block.timestamp;
     }
 
     // The following functions are overrides required by Solidity.
@@ -68,13 +73,18 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
     }
 
     function createSpecialType(
-        string[] memory uris
+        string[] memory uris,
+        uint256 price
     ) public onlyOwner {
         require(uris.length == 8, "Must provide 8 URIs");
+        require(price > 0, "Price must be greater than 0");
+
         uint256 specialTypeId = _specialIdCounter.current();
         _specialIdCounter.increment();
         
         isValidSpecialTypeId[specialTypeId] = true;
+
+        specialTypeIdToPrice[specialTypeId] = price;
 
         specialTypeIdToSpecialPhaseURIs[specialTypeId]["New Moon"] = uris[0];
         specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waxing Crescent"] = uris[1];

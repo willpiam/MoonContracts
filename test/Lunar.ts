@@ -18,21 +18,28 @@ describe("Lunar", async function () {
 
         const currentFraction: bigint = await lunar.currentFrac();
         console.log(`Current fraction:  ${currentFraction}`);
+
+        const numberOfSynodicMonths: bigint = await lunar.numberOfSynodicMonthsSinceReferenceNewMoon();
+        console.log(`Number of synodic months since reference new moon: ${numberOfSynodicMonths}`);
     });
 
     it("NFT Contract", async function () {
         const prefix = "https://williamdoyle.ca/lunar-tokens/standard-version/";
         const postfix = ".json";
-        nftContract = await ethers.deployContract("LunarTokens", [lunar.getAddress(), [
-            `${prefix}New_Moon${postfix}`,
-            `${prefix}Waxing_Crescent${postfix}`,
-            `${prefix}First_Quarter${postfix}`,
-            `${prefix}Waxing_Gibbous${postfix}`,
-            `${prefix}Full_Moon${postfix}`,
-            `${prefix}Waning_Gibbous${postfix}`,
-            `${prefix}Last_Quarter${postfix}`,
-            `${prefix}Waning_Crescent${postfix}`,
-        ]]);
+        nftContract = await ethers.deployContract("LunarTokens", [
+            lunar.getAddress(),
+            [
+                `${prefix}New_Moon${postfix}`,
+                `${prefix}Waxing_Crescent${postfix}`,
+                `${prefix}First_Quarter${postfix}`,
+                `${prefix}Waxing_Gibbous${postfix}`,
+                `${prefix}Full_Moon${postfix}`,
+                `${prefix}Waning_Gibbous${postfix}`,
+                `${prefix}Last_Quarter${postfix}`,
+                `${prefix}Waning_Crescent${postfix}`,
+            ],
+            ethers.parseEther("1")
+        ]);
 
         owner = await nftContract.owner();
         console.log(`NFT Contract owner: ${owner}`);
@@ -51,16 +58,19 @@ describe("Lunar", async function () {
     it("NFT Contract - Create a special type", async function () {
         const prefix = "https://williamdoyle.ca/lunar-tokens/psychedelic-version/";
         const postfix = ".json";
-        await nftContract.createSpecialType([
-            `${prefix}New_Moon${postfix}`,
-            `${prefix}Waxing_Crescent${postfix}`,
-            `${prefix}First_Quarter${postfix}`,
-            `${prefix}Waxing_Gibbous${postfix}`,
-            `${prefix}Full_Moon${postfix}`,
-            `${prefix}Waning_Gibbous${postfix}`,
-            `${prefix}Last_Quarter${postfix}`,
-            `${prefix}Waning_Crescent${postfix}`,
-        ])
+        await nftContract.createSpecialType(
+            [
+                `${prefix}New_Moon${postfix}`,
+                `${prefix}Waxing_Crescent${postfix}`,
+                `${prefix}First_Quarter${postfix}`,
+                `${prefix}Waxing_Gibbous${postfix}`,
+                `${prefix}Full_Moon${postfix}`,
+                `${prefix}Waning_Gibbous${postfix}`,
+                `${prefix}Last_Quarter${postfix}`,
+                `${prefix}Waning_Crescent${postfix}`,
+            ],
+            ethers.parseEther("2")
+        )
 
         await nftContract.mint(owner, 1);
         const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 1);
@@ -76,16 +86,19 @@ describe("Lunar", async function () {
     it("NFT Contract - Create another special type", async function () {
         const prefix = "https://williamdoyle.ca/lunar-tokens/minimalist-version/";
         const postfix = ".json";
-        await nftContract.createSpecialType([
-            `${prefix}New_Moon${postfix}`,
-            `${prefix}Waxing_Crescent${postfix}`,
-            `${prefix}First_Quarter${postfix}`,
-            `${prefix}Waxing_Gibbous${postfix}`,
-            `${prefix}Full_Moon${postfix}`,
-            `${prefix}Waning_Gibbous${postfix}`,
-            `${prefix}Last_Quarter${postfix}`,
-            `${prefix}Waning_Crescent${postfix}`,
-        ])
+        await nftContract.createSpecialType(
+            [
+                `${prefix}New_Moon${postfix}`,
+                `${prefix}Waxing_Crescent${postfix}`,
+                `${prefix}First_Quarter${postfix}`,
+                `${prefix}Waxing_Gibbous${postfix}`,
+                `${prefix}Full_Moon${postfix}`,
+                `${prefix}Waning_Gibbous${postfix}`,
+                `${prefix}Last_Quarter${postfix}`,
+                `${prefix}Waning_Crescent${postfix}`,
+            ],
+            ethers.parseEther("3")
+        )
 
         await nftContract.mint(owner, 2);
         const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 2);

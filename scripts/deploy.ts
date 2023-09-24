@@ -25,7 +25,7 @@ async function main() {
 
   console.log(`Current phase:     ${currentPhase}`);
 
-  const nftContract = await ethers.deployContract("LunarTokens", [lunarAddress, uris]);
+  const nftContract = await ethers.deployContract("LunarTokens", [lunarAddress, uris, ethers.parseEther("1")]);
 
   const nftContractAddress = await nftContract.getAddress();
 
