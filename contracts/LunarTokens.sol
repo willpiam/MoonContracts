@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+// pull payments
+import "@openzeppelin/contracts/security/PullPayment.sol";
 import "./ILunar.sol";
 
 contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
@@ -33,13 +35,19 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
     ) ERC721("Magic Moons", "MMOON") {
         lunar = _lunaSource;
 
-        createSpecialType(uris, standardPrice, type(uint256).max); // make specialTypeIdToSpecialPhaseURIs[0] the default type
+        createSpecialType(uris, standardPrice, 100_000); // make specialTypeIdToSpecialPhaseURIs[0] the default type
+    }
+
+    function changePrice(uint256 specialTypeId, uint256 newPrice) public onlyOwner {
+        require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
+        specialTypeIdToPrice[specialTypeId] = newPrice;
     }
 
     function mint(address to, uint256 specialTypeId) public payable {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
         // require(Strings.equal(lunar.currentPhase(), "Full Moon"), "You can only mint under a Full Moon"); // for later  
         require(specialTypeIdToAmountMinted[specialTypeId] < specialTypeIdToSupply[specialTypeId], "Supply of this type has been exhausted");
+        require(msg.value == specialTypeIdToPrice[specialTypeId], "Must send the correct amount of Currency");
 
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();

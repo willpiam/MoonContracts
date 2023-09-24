@@ -44,7 +44,9 @@ describe("Lunar", async () => {
         owner = await nftContract.owner();
         console.log(`NFT Contract owner: ${owner}`);
 
-        await nftContract.mint(owner, 0);
+        await nftContract.mint(owner, 0, {
+            value: ethers.parseEther("1")
+        });
         const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 0);
         expect(tokenId).to.equal(0);
 
@@ -53,6 +55,7 @@ describe("Lunar", async () => {
 
         const expectedURI = `${prefix}${currentPhase.replace(` `, `_`)}${postfix}`;
         expect(tokenURI).to.equal(expectedURI);
+
     })
 
     it("NFT Contract - Create a special type", async () => {
@@ -73,7 +76,9 @@ describe("Lunar", async () => {
             100
         )
 
-        await nftContract.mint(owner, 1);
+        await nftContract.mint(owner, 1, {
+            value: ethers.parseEther("2")
+        });
         const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 1);
         expect(tokenId).to.equal(1);
 
@@ -102,7 +107,9 @@ describe("Lunar", async () => {
             50
         )
 
-        await nftContract.mint(owner, 2);
+        await nftContract.mint(owner, 2, {
+            value: ethers.parseEther("3")
+        });
         const tokenId = await nftContract.tokenOfOwnerByIndex(owner, 2);
         expect(tokenId).to.equal(2);
 
@@ -114,6 +121,10 @@ describe("Lunar", async () => {
     })
 
     it.skip("Make sure we can't mint more than the specified supply of a given special type", async () => {
+
+    })
+
+    it.skip("Owner can change price", async () => {
 
     })
 });
