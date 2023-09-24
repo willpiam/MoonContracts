@@ -21,6 +21,8 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
     mapping(uint256 => mapping(string => string)) private specialTypeIdToSpecialPhaseURIs;
     mapping(uint256 => bool) private isValidSpecialTypeId;
     mapping(uint256 => uint256) private specialTypeIdToPrice; 
+    mapping(uint256 => uint256) private specialTypeIdToSupply; 
+    mapping(uint256 => uint256) private specialTypeIdToAmountMinted;
 
     uint256 private timestampOfLastMint;
 
@@ -31,17 +33,19 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
     ) ERC721("Magic Moons", "MMOON") {
         lunar = _lunaSource;
 
-        createSpecialType(uris, standardPrice); // make specialTypeIdToSpecialPhaseURIs[0] the default type
+        createSpecialType(uris, standardPrice, type(uint256).max); // make specialTypeIdToSpecialPhaseURIs[0] the default type
     }
 
-    function mint(address to, uint256 specialTypeId) public payable onlyOwner {
+    function mint(address to, uint256 specialTypeId) public payable {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
         // require(Strings.equal(lunar.currentPhase(), "Full Moon"), "You can only mint under a Full Moon"); // for later  
+        require(specialTypeIdToAmountMinted[specialTypeId] < specialTypeIdToSupply[specialTypeId], "Supply of this type has been exhausted");
 
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
 
         tokenIdToSpecialTypeId[tokenId] = specialTypeId;
+        specialTypeIdToAmountMinted[specialTypeId]++;
 
         _safeMint(to, tokenId);
         timestampOfLastMint = block.timestamp;
@@ -74,10 +78,12 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
 
     function createSpecialType(
         string[] memory uris,
-        uint256 price
+        uint256 price,
+        uint256 supply
     ) public onlyOwner {
         require(uris.length == 8, "Must provide 8 URIs");
         require(price > 0, "Price must be greater than 0");
+        require(supply > 0, "Supply must be greater than 0");
 
         uint256 specialTypeId = _specialIdCounter.current();
         _specialIdCounter.increment();
@@ -85,6 +91,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
         isValidSpecialTypeId[specialTypeId] = true;
 
         specialTypeIdToPrice[specialTypeId] = price;
+        specialTypeIdToSupply[specialTypeId] = supply;
 
         specialTypeIdToSpecialPhaseURIs[specialTypeId]["New Moon"] = uris[0];
         specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waxing Crescent"] = uris[1];

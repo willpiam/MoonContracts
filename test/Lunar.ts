@@ -1,13 +1,13 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("Lunar", async function () {
+describe("Lunar", async () => {
     let lunar: any;
     let currentPhase: string;
     let nftContract: any;
     let owner: any;
 
-    it("simple test", async function () {
+    it("simple test", async () => {
         lunar = await ethers.deployContract("Lunar");
         await lunar.waitForDeployment();
         const lunarAddress = await lunar.getAddress();
@@ -23,7 +23,7 @@ describe("Lunar", async function () {
         console.log(`Number of synodic months since reference new moon: ${numberOfSynodicMonths}`);
     });
 
-    it("NFT Contract", async function () {
+    it("NFT Contract", async () => {
         const prefix = "https://williamdoyle.ca/lunar-tokens/standard-version/";
         const postfix = ".json";
         nftContract = await ethers.deployContract("LunarTokens", [
@@ -55,7 +55,7 @@ describe("Lunar", async function () {
         expect(tokenURI).to.equal(expectedURI);
     })
 
-    it("NFT Contract - Create a special type", async function () {
+    it("NFT Contract - Create a special type", async () => {
         const prefix = "https://williamdoyle.ca/lunar-tokens/psychedelic-version/";
         const postfix = ".json";
         await nftContract.createSpecialType(
@@ -69,7 +69,8 @@ describe("Lunar", async function () {
                 `${prefix}Last_Quarter${postfix}`,
                 `${prefix}Waning_Crescent${postfix}`,
             ],
-            ethers.parseEther("2")
+            ethers.parseEther("2"),
+            100
         )
 
         await nftContract.mint(owner, 1);
@@ -83,7 +84,7 @@ describe("Lunar", async function () {
         expect(tokenURI).to.equal(expectedURI);
     })
 
-    it("NFT Contract - Create another special type", async function () {
+    it("NFT Contract - Create another special type", async () => {
         const prefix = "https://williamdoyle.ca/lunar-tokens/minimalist-version/";
         const postfix = ".json";
         await nftContract.createSpecialType(
@@ -97,7 +98,8 @@ describe("Lunar", async function () {
                 `${prefix}Last_Quarter${postfix}`,
                 `${prefix}Waning_Crescent${postfix}`,
             ],
-            ethers.parseEther("3")
+            ethers.parseEther("3"),
+            50
         )
 
         await nftContract.mint(owner, 2);
@@ -109,5 +111,9 @@ describe("Lunar", async function () {
 
         const expectedURI = `${prefix}${currentPhase.replace(` `, `_`)}${postfix}`;
         expect(tokenURI).to.equal(expectedURI);
+    })
+
+    it.skip("Make sure we can't mint more than the specified supply of a given special type", async () => {
+
     })
 });
