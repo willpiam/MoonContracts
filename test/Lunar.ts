@@ -105,7 +105,7 @@ describe("Lunar", async () => {
                 `${prefix}Waning_Crescent${postfix}`,
             ],
             ethers.parseEther("3"),
-            50
+            3
         )
 
         await nftContract.mint(owner, 2, {
@@ -121,15 +121,20 @@ describe("Lunar", async () => {
         expect(tokenURI).to.equal(expectedURI);
     })
 
-    it.skip("Make sure we can't mint more than the specified supply of a given special type", async () => {
+    it("Make sure we can't mint more than the specified supply of a given special type", async () => {
+        // mint 2 more of the minimalist type
+        await nftContract.mint(owner, 2, { value: ethers.parseEther("3") });
+        await nftContract.mint(owner, 2, { value: ethers.parseEther("3") });
 
+        // expect the next mint call to fail
+        expect(nftContract.mint(owner, 2, { value: ethers.parseEther("3") })).to.be.revertedWith("Supply of this type has been exhausted")
     })
 
     it.skip("Payment address can withdraw funds", async () => {
 
     })
 
-    it.skip("Owner can change price and payment address", async () => {
+    it.skip("Owner can change price and payment address or even the lunar data source contract", async () => {
 
     })
 

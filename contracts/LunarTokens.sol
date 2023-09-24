@@ -10,13 +10,16 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/PullPayment.sol";
 import "./ILunar.sol";
 
+struct Settings {
+    ILunar lunar;
+    address paymentAddress;
+}
+
 contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullPayment {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
     Counters.Counter private _specialIdCounter;
-
-    ILunar public lunar;
 
     mapping(uint256 => uint256) private tokenIdToSpecialTypeId;
     mapping(uint256 => mapping(string => string)) private specialTypeIdToSpecialPhaseURIs;
@@ -24,8 +27,9 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     mapping(uint256 => uint256) private specialTypeIdToPrice; 
     mapping(uint256 => uint256) private specialTypeIdToSupply; 
     mapping(uint256 => uint256) private specialTypeIdToAmountMinted;
+    mapping(uint256 => uint256) private specialTypeIdToAmountBurned;
 
-    address private paymentAddress;
+    Settings settings;
 
     constructor(
         ILunar _lunaSource,
@@ -33,11 +37,15 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
         uint256 standardPrice,
         address _paymentAddress
     ) ERC721("Magic Moons", "MMOON") {
-        lunar = _lunaSource;
+        settings.lunar = _lunaSource;
 
-        paymentAddress = _paymentAddress;
+        settings.paymentAddress = _paymentAddress;
 
         createSpecialType(uris, standardPrice, 100_000); // make specialTypeIdToSpecialPhaseURIs[0] the default type
+    }
+
+    function liveSupplyOf(uint256 specialTypeId) public view returns (uint256) {
+        return specialTypeIdToAmountMinted[specialTypeId] - specialTypeIdToAmountBurned[specialTypeId];
     }
 
     function changePrice(uint256 specialTypeId, uint256 newPrice) public onlyOwner {
@@ -45,10 +53,14 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
         specialTypeIdToPrice[specialTypeId] = newPrice;
     }
 
-    function changePaymentAddress(address newPaymentAddress) public onlyOwner {
-        paymentAddress = newPaymentAddress;
+    function setSettings(
+        ILunar _lunaSource,
+        address _paymentAddress
+    ) public onlyOwner {
+        settings.lunar = _lunaSource;
+        settings.paymentAddress = _paymentAddress;
     }
-
+    
     function mint(address to, uint256 specialTypeId) public payable {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
         // require(Strings.equal(lunar.currentPhase(), "Full Moon"), "You can only mint under a Full Moon"); // for later  
@@ -63,7 +75,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
 
         _safeMint(to, tokenId);
 
-        _asyncTransfer(paymentAddress, specialTypeIdToPrice[specialTypeId]); // pay for minting
+        _asyncTransfer(settings.paymentAddress, specialTypeIdToPrice[specialTypeId]); // pay for minting
     }
 
     // The following functions are overrides required by Solidity.
@@ -88,7 +100,13 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     ) public view override(ERC721) returns (string memory) {
         require(_exists(tokenId), "URI query for nonexistent token");
         uint256 specialTypeId = tokenIdToSpecialTypeId[tokenId];
-        return specialTypeIdToSpecialPhaseURIs[specialTypeId][lunar.currentPhase()];
+        return specialTypeIdToSpecialPhaseURIs[specialTypeId][settings.lunar.currentPhase()];
+    }
+
+    function burn(uint256 tokenId) public override(ERC721Burnable) {
+        uint256 specialTypeId = tokenIdToSpecialTypeId[tokenId];
+        super.burn(tokenId);
+        specialTypeIdToAmountBurned[specialTypeId]++;
     }
 
     function createSpecialType(
