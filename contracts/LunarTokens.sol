@@ -44,13 +44,21 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
         createSpecialType(uris, standardPrice, 100_000); // make specialTypeIdToSpecialPhaseURIs[0] the default type
     }
 
+    function getPrice(uint256 specialTypeId) public view returns (uint256) {
+        return specialTypeIdToPrice[specialTypeId];
+    }
+
     function liveSupplyOf(uint256 specialTypeId) public view returns (uint256) {
         return specialTypeIdToAmountMinted[specialTypeId] - specialTypeIdToAmountBurned[specialTypeId];
     }
 
-    function changePrice(uint256 specialTypeId, uint256 newPrice) public onlyOwner {
+    function setPrice(uint256 specialTypeId, uint256 newPrice) public onlyOwner {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
         specialTypeIdToPrice[specialTypeId] = newPrice;
+    }
+
+    function liveMintableAmount(uint256 specialTypeId) public view returns (uint256) {
+        return specialTypeIdToSupply[specialTypeId] - specialTypeIdToAmountMinted[specialTypeId];
     }
 
     function setSettings(

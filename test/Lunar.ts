@@ -145,7 +145,27 @@ describe("Lunar", async () => {
         expect(balanceAfter).to.be.gt(balanceBefore);
     })
 
-    it.skip("Owner can change price and payment address or even the lunar data source contract", async () => {
+    it("Owner can change price and payment address or even the lunar data source contract", async () => {
+        const price_t1 = await nftContract.getPrice(0);
+        expect(price_t1).to.equal(ethers.parseEther("1"))
+
+        await nftContract.setPrice(0, ethers.parseEther("1.1"));
+
+        const price_t2 = await nftContract.getPrice(0);
+        expect(price_t2).to.equal(ethers.parseEther("1.1"))
+    })
+
+    it("burning tokens, total supply, and live supply of individual types + live mintable amount", async () => {
+        const totalSupply = await nftContract.totalSupply();
+        console.log(`Total supply: ${totalSupply}`);
+
+        const liveSupplyOfStandard = await nftContract.liveSupplyOf(0);
+        console.log(`Live supply of standard: ${liveSupplyOfStandard}`);
+
+        const liveMintableAmountOfStandard = await nftContract.liveMintableAmountOf(0);
+        console.log(`Live mintable amount of standard: ${liveMintableAmountOfStandard}`);
+
+        // continue here ... 
 
     })
 
