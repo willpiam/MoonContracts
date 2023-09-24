@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "./ILunar.sol";
 
 contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
@@ -31,6 +32,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable {
 
     function mint(address to, uint256 specialTypeId) public onlyOwner {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
+        // require(Strings.equal(lunar.currentPhase(), "Full Moon"), "You can only mint under a Full Moon"); // for later  
         
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
