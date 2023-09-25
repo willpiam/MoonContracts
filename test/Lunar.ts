@@ -148,12 +148,12 @@ describe("Lunar", async () => {
 
     it("Owner can change price and payment address or even the lunar data source contract", async () => {
         // change the price
-        const price_t1 = await nftContract.getPrice(0);
+        const price_t1 = await nftContract.specialTypeIdToPrice(0);
         expect(price_t1).to.equal(ethers.parseEther("1"))
 
         await nftContract.setPrice(0, ethers.parseEther("1.1"));
 
-        const price_t2 = await nftContract.getPrice(0);
+        const price_t2 = await nftContract.specialTypeIdToPrice(0);
         expect(price_t2).to.equal(ethers.parseEther("1.1"))
 
         // change the payment and lunar data source address
@@ -194,7 +194,7 @@ describe("Lunar", async () => {
         const liveSupplyOfStandard_t1 = await nftContract.liveSupplyOf(0);
         console.log(`Live supply of standard: ${liveSupplyOfStandard_t1}`);
 
-        const liveMintableAmountOfStandard_t1 = await nftContract.liveMintableAmountOf(0);
+        const liveMintableAmountOfStandard_t1 = await nftContract.remainingMintableAmountOf(0);
         console.log(`Live mintable amount of standard: ${liveMintableAmountOfStandard_t1}`);
 
         // burn a token
@@ -208,10 +208,8 @@ describe("Lunar", async () => {
         console.log(`Live supply of standard: ${liveSupplyOfStandard_t2}`);
         expect(liveSupplyOfStandard_t2).to.equal(liveSupplyOfStandard_t1 - 1n);
 
-        const liveMintableAmountOfStandard_t2 = await nftContract.liveMintableAmountOf(0);  // burn should not affect the number that can be minted
+        const liveMintableAmountOfStandard_t2 = await nftContract.remainingMintableAmountOf(0);  // burn should not affect the number that can be minted
         console.log(`Live mintable amount of standard: ${liveMintableAmountOfStandard_t2}`);
         expect(liveMintableAmountOfStandard_t2).to.equal(liveMintableAmountOfStandard_t1);
     })
-
-
 });

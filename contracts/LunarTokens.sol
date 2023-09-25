@@ -24,12 +24,16 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     mapping(uint256 => uint256) private tokenIdToSpecialTypeId;
     mapping(uint256 => mapping(string => string)) private specialTypeIdToSpecialPhaseURIs;
     mapping(uint256 => bool) private isValidSpecialTypeId;
-    mapping(uint256 => uint256) private specialTypeIdToPrice; 
-    mapping(uint256 => uint256) private specialTypeIdToSupply; 
+    mapping(uint256 => uint256) public specialTypeIdToPrice; 
+    mapping(uint256 => uint256) public specialTypeIdToSupply; 
     mapping(uint256 => uint256) private specialTypeIdToAmountMinted;
-    mapping(uint256 => uint256) private specialTypeIdToAmountBurned;
+    mapping(uint256 => uint256) public specialTypeIdToAmountBurned;
 
     Settings public settings;
+
+    event SettingsChanged();
+    event PriceChanged(uint256 specialTypeId);
+    event NewSpecialTypeCreated(uint256 specialTypeId);
 
     constructor(
         ILunar _lunaSource,
@@ -44,21 +48,18 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
         createSpecialType(uris, standardPrice, 100_000); // make specialTypeIdToSpecialPhaseURIs[0] the default type
     }
 
-    function getPrice(uint256 specialTypeId) public view returns (uint256) {
-        return specialTypeIdToPrice[specialTypeId];
-    }
-
     function liveSupplyOf(uint256 specialTypeId) public view returns (uint256) {
         return specialTypeIdToAmountMinted[specialTypeId] - specialTypeIdToAmountBurned[specialTypeId];
+    }
+    
+    function remainingMintableAmountOf(uint256 specialTypeId) public view returns (uint256) {
+        return specialTypeIdToSupply[specialTypeId] - specialTypeIdToAmountMinted[specialTypeId];
     }
 
     function setPrice(uint256 specialTypeId, uint256 newPrice) public onlyOwner {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
         specialTypeIdToPrice[specialTypeId] = newPrice;
-    }
-
-    function liveMintableAmountOf(uint256 specialTypeId) public view returns (uint256) {
-        return specialTypeIdToSupply[specialTypeId] - specialTypeIdToAmountMinted[specialTypeId];
+        emit PriceChanged(specialTypeId);
     }
 
     function setSettings(
@@ -67,6 +68,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     ) public onlyOwner {
         settings.lunar = _lunaSource;
         settings.paymentAddress = _paymentAddress;
+        emit SettingsChanged();
     }
     
     function mint(address to, uint256 specialTypeId) public payable {
@@ -86,8 +88,38 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
         _asyncTransfer(settings.paymentAddress, specialTypeIdToPrice[specialTypeId]); // pay for minting
     }
 
-    // The following functions are overrides required by Solidity.
+    function createSpecialType(
+        string[] memory uris,
+        uint256 price,
+        uint256 supply
+    ) public onlyOwner {
+        require(uris.length == 8, "Must provide 8 URIs");
+        require(price > 0, "Price must be greater than 0");
+        require(supply > 0, "Supply must be greater than 0");
 
+        uint256 specialTypeId = _specialIdCounter.current();
+        _specialIdCounter.increment();
+        
+        isValidSpecialTypeId[specialTypeId] = true;
+
+        specialTypeIdToPrice[specialTypeId] = price;
+        emit PriceChanged(specialTypeId);
+
+        specialTypeIdToSupply[specialTypeId] = supply;
+
+        specialTypeIdToSpecialPhaseURIs[specialTypeId]["New Moon"] = uris[0];
+        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waxing Crescent"] = uris[1];
+        specialTypeIdToSpecialPhaseURIs[specialTypeId]["First Quarter"] = uris[2];
+        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waxing Gibbous"] = uris[3];
+        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Full Moon"] = uris[4];
+        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waning Gibbous"] = uris[5];
+        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Last Quarter"] = uris[6];
+        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waning Crescent"] = uris[7];
+
+        emit NewSpecialTypeCreated(specialTypeId);
+    }
+
+    // The following functions are overrides required by Solidity.
     function _beforeTokenTransfer(
         address from,
         address to,
@@ -112,35 +144,9 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     }
 
     function burn(uint256 tokenId) public override(ERC721Burnable) {
-        uint256 specialTypeId = tokenIdToSpecialTypeId[tokenId];
         super.burn(tokenId);
+        uint256 specialTypeId = tokenIdToSpecialTypeId[tokenId];
         specialTypeIdToAmountBurned[specialTypeId]++;
-    }
-
-    function createSpecialType(
-        string[] memory uris,
-        uint256 price,
-        uint256 supply
-    ) public onlyOwner {
-        require(uris.length == 8, "Must provide 8 URIs");
-        require(price > 0, "Price must be greater than 0");
-        require(supply > 0, "Supply must be greater than 0");
-
-        uint256 specialTypeId = _specialIdCounter.current();
-        _specialIdCounter.increment();
-        
-        isValidSpecialTypeId[specialTypeId] = true;
-
-        specialTypeIdToPrice[specialTypeId] = price;
-        specialTypeIdToSupply[specialTypeId] = supply;
-
-        specialTypeIdToSpecialPhaseURIs[specialTypeId]["New Moon"] = uris[0];
-        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waxing Crescent"] = uris[1];
-        specialTypeIdToSpecialPhaseURIs[specialTypeId]["First Quarter"] = uris[2];
-        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waxing Gibbous"] = uris[3];
-        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Full Moon"] = uris[4];
-        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waning Gibbous"] = uris[5];
-        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Last Quarter"] = uris[6];
-        specialTypeIdToSpecialPhaseURIs[specialTypeId]["Waning Crescent"] = uris[7];
+        delete tokenIdToSpecialTypeId[tokenId];
     }
 }
