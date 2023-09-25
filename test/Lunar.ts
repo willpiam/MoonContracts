@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("Lunar", async () => {
     let lunar: any;
@@ -9,9 +10,25 @@ describe("Lunar", async () => {
     const paymentAccount = ethers.Wallet.createRandom();
     let lunarAddress: string;
 
-    it("simple test", async () => {
+    before(async () => {
+        console.log(`Inside Before`)
         lunar = await ethers.deployContract("Lunar");
         await lunar.waitForDeployment();
+
+        // make sure the blockchain thinks its currently a new moon
+        currentPhase = await lunar.currentPhase();
+
+        while (currentPhase !== "Full Moon") {
+            await time.increase(60 * 60 * 24); // increase time by 1 day
+            currentPhase = await lunar.currentPhase();
+
+            console.log(`Current phase: ${currentPhase}`);
+        }
+
+        console.log(`We've arrived at the next Full Moon! Ta-da!`)
+    });
+
+    it("simple test", async () => {
         lunarAddress = await lunar.getAddress();
         console.log(`Lunar deployed to: ${lunarAddress}`)
 
@@ -199,7 +216,7 @@ describe("Lunar", async () => {
 
         // burn a token
         await nftContract.burn(0);
-        
+
         const totalSupply_t2 = await nftContract.totalSupply();
         console.log(`Total supply: ${totalSupply_t2}`);
         expect(totalSupply_t2).to.equal(totalSupply_t1 - 1n);
@@ -212,4 +229,22 @@ describe("Lunar", async () => {
         console.log(`Live mintable amount of standard: ${liveMintableAmountOfStandard_t2}`);
         expect(liveMintableAmountOfStandard_t2).to.equal(liveMintableAmountOfStandard_t1);
     })
+
+    it("Cannot mint tokens when it's not a full moon", async () => {
+        currentPhase = await lunar.currentPhase();
+
+        while (currentPhase === "Full Moon") {
+            await time.increase(60 * 60 * 24); // increase time by 1 day
+            currentPhase = await lunar.currentPhase();
+
+            console.log(`Current phase: ${currentPhase}`);
+        }
+
+        console.log(`Moved passed the full moon! Minting should now be disabled.`)
+
+        // try to mint standard token
+        expect(nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") })).to.be.revertedWith("You can only mint under a Full Moon")
+    })
+
+
 });

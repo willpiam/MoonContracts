@@ -73,7 +73,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     
     function mint(address to, uint256 specialTypeId) public payable {
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
-        // require(Strings.equal(lunar.currentPhase(), "Full Moon"), "You can only mint under a Full Moon"); // for later  
+        require(Strings.equal(settings.lunar.currentPhase(), "Full Moon"), "You can only mint under a Full Moon"); // for later  
         require(specialTypeIdToAmountMinted[specialTypeId] < specialTypeIdToSupply[specialTypeId], "Supply of this type has been exhausted");
         require(msg.value == specialTypeIdToPrice[specialTypeId], "Must send the correct amount of Currency");
 
