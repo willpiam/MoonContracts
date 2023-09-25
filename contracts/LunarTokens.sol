@@ -29,7 +29,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     mapping(uint256 => uint256) private specialTypeIdToAmountMinted;
     mapping(uint256 => uint256) private specialTypeIdToAmountBurned;
 
-    Settings settings;
+    Settings public settings;
 
     constructor(
         ILunar _lunaSource,
@@ -57,7 +57,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
         specialTypeIdToPrice[specialTypeId] = newPrice;
     }
 
-    function liveMintableAmount(uint256 specialTypeId) public view returns (uint256) {
+    function liveMintableAmountOf(uint256 specialTypeId) public view returns (uint256) {
         return specialTypeIdToSupply[specialTypeId] - specialTypeIdToAmountMinted[specialTypeId];
     }
 

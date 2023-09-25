@@ -7,11 +7,12 @@ describe("Lunar", async () => {
     let nftContract: any;
     let owner: any;
     const paymentAccount = ethers.Wallet.createRandom();
+    let lunarAddress: string;
 
     it("simple test", async () => {
         lunar = await ethers.deployContract("Lunar");
         await lunar.waitForDeployment();
-        const lunarAddress = await lunar.getAddress();
+        lunarAddress = await lunar.getAddress();
         console.log(`Lunar deployed to: ${lunarAddress}`)
 
         currentPhase = await lunar.currentPhase();
@@ -146,6 +147,7 @@ describe("Lunar", async () => {
     })
 
     it("Owner can change price and payment address or even the lunar data source contract", async () => {
+        // change the price
         const price_t1 = await nftContract.getPrice(0);
         expect(price_t1).to.equal(ethers.parseEther("1"))
 
@@ -153,20 +155,62 @@ describe("Lunar", async () => {
 
         const price_t2 = await nftContract.getPrice(0);
         expect(price_t2).to.equal(ethers.parseEther("1.1"))
+
+        // change the payment and lunar data source address
+        const settings_t1 = await nftContract.settings();
+        console.log(`Settings: ${settings_t1}`);
+
+        expect(settings_t1[0]).to.equal(lunarAddress); // check lunar data source address
+        expect(settings_t1[1]).to.equal(paymentAccount.address); // check payment recipient address 
+
+        const newLunarDataSource = await ethers.deployContract("Lunar");
+        await newLunarDataSource.waitForDeployment();
+
+        const newLunarDataSourceAddress = await newLunarDataSource.getAddress();
+        console.log(`New Lunar data source address: ${newLunarDataSourceAddress}`);
+
+        const newPaymentAccount = ethers.Wallet.createRandom();
+        console.log(`New payment account: ${newPaymentAccount.address}`);
+
+        await nftContract.setSettings(newLunarDataSourceAddress, newPaymentAccount.address);
+
+        const settings_t2 = await nftContract.settings();
+
+        expect(settings_t2[0]).to.equal(newLunarDataSourceAddress); // check lunar data source address
+        expect(settings_t2[1]).to.equal(newPaymentAccount.address); // check payment recipient address
+
+        // change it back
+        await nftContract.setSettings(lunarAddress, paymentAccount.address);
     })
 
     it("burning tokens, total supply, and live supply of individual types + live mintable amount", async () => {
-        const totalSupply = await nftContract.totalSupply();
-        console.log(`Total supply: ${totalSupply}`);
+        await nftContract.mint(owner, 0, {
+            value: ethers.parseEther("1.1")
+        });
 
-        const liveSupplyOfStandard = await nftContract.liveSupplyOf(0);
-        console.log(`Live supply of standard: ${liveSupplyOfStandard}`);
+        const totalSupply_t1 = await nftContract.totalSupply();
+        console.log(`Total supply: ${totalSupply_t1}`);
 
-        const liveMintableAmountOfStandard = await nftContract.liveMintableAmountOf(0);
-        console.log(`Live mintable amount of standard: ${liveMintableAmountOfStandard}`);
+        const liveSupplyOfStandard_t1 = await nftContract.liveSupplyOf(0);
+        console.log(`Live supply of standard: ${liveSupplyOfStandard_t1}`);
 
-        // continue here ... 
+        const liveMintableAmountOfStandard_t1 = await nftContract.liveMintableAmountOf(0);
+        console.log(`Live mintable amount of standard: ${liveMintableAmountOfStandard_t1}`);
 
+        // burn a token
+        await nftContract.burn(0);
+        
+        const totalSupply_t2 = await nftContract.totalSupply();
+        console.log(`Total supply: ${totalSupply_t2}`);
+        expect(totalSupply_t2).to.equal(totalSupply_t1 - 1n);
+
+        const liveSupplyOfStandard_t2 = await nftContract.liveSupplyOf(0);
+        console.log(`Live supply of standard: ${liveSupplyOfStandard_t2}`);
+        expect(liveSupplyOfStandard_t2).to.equal(liveSupplyOfStandard_t1 - 1n);
+
+        const liveMintableAmountOfStandard_t2 = await nftContract.liveMintableAmountOf(0);  // burn should not affect the number that can be minted
+        console.log(`Live mintable amount of standard: ${liveMintableAmountOfStandard_t2}`);
+        expect(liveMintableAmountOfStandard_t2).to.equal(liveMintableAmountOfStandard_t1);
     })
 
 
