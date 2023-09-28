@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-const uris : string[] = [
+const uris: string[] = [
   `QmUBF8UzjH3cLw9wrUjrwoydBoxhukaGJZtKf9K1GQxKhG/New_Moon.json`,
   `QmUBF8UzjH3cLw9wrUjrwoydBoxhukaGJZtKf9K1GQxKhG/Waxing_Crescent.json`,
   `QmUBF8UzjH3cLw9wrUjrwoydBoxhukaGJZtKf9K1GQxKhG/First_Quarter.json`,
@@ -11,9 +11,13 @@ const uris : string[] = [
   `QmUBF8UzjH3cLw9wrUjrwoydBoxhukaGJZtKf9K1GQxKhG/Waning_Crescent.json`,
 ];
 
+const MAX_SUPPLY_STANDARD_TYPE = '3000';
+const MAX_MINT_PER_MONTH = '125';
+const PAYMENT_ADDRESS = '0xd90f7Fb941829CFE7Fc50eD235d1Efac05c58190'
+
 async function main() {
 
-  const lunar = await ethers.deployContract("Lunar", [], { });
+  const lunar = await ethers.deployContract("Lunar", [], {});
 
   await lunar.waitForDeployment();
 
@@ -25,7 +29,16 @@ async function main() {
 
   console.log(`Current phase:     ${currentPhase}`);
 
-  const nftContract = await ethers.deployContract("LunarTokens", [lunarAddress, uris, ethers.parseEther("1")]);
+  const nftContract = await ethers.deployContract("LunarTokens", [
+    lunarAddress,
+    uris,
+    ethers.parseEther("1"),
+    PAYMENT_ADDRESS,
+    MAX_SUPPLY_STANDARD_TYPE,
+    MAX_MINT_PER_MONTH
+  ], {});
+
+  console.log(`called deployContract`);
 
   const nftContractAddress = await nftContract.getAddress();
 
@@ -36,11 +49,11 @@ async function main() {
   console.log(`NFT Contract owner: ${owner}`);
 
   // mint one into my account
-  await nftContract.mint(`0xd90f7Fb941829CFE7Fc50eD235d1Efac05c58190`, 0);
+  // await nftContract.mint(`0xd90f7Fb941829CFE7Fc50eD235d1Efac05c58190`, 0);
 
-  const tokenId = await nftContract.tokenOfOwnerByIndex(`0xd90f7Fb941829CFE7Fc50eD235d1Efac05c58190`, 0);
+  // const tokenId = await nftContract.tokenOfOwnerByIndex(`0xd90f7Fb941829CFE7Fc50eD235d1Efac05c58190`, 0);
 
-  console.log(`Token ID: ${tokenId}`);
+  // console.log(`Token ID: ${tokenId}`);
 
 }
 

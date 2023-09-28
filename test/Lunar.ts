@@ -6,6 +6,7 @@ import Chronos from "./Chronos";
 const MAX_SUPPLY_STANDARD_TYPE = 1000n;
 const MAX_MINT_PER_MONTH = 10n;
 
+
 describe("Lunar", async () => {
     let lunar: any;
     let currentPhase: string;
