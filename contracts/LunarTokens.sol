@@ -33,8 +33,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     Settings public settings;
     uint256 private momentOfDeployment;
 
-    uint256 constant private MAX_SUPPLY_STANDARD_TYPE = 100_000;
-    uint256 constant private MAX_MINT_PER_MONTH = 1_000;
+    uint256 private maxMintPerMonth;
 
     event SettingsChanged();
     event PriceChanged(uint256 specialTypeId);
@@ -44,14 +43,17 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
         ILunar _lunaSource,
         string[] memory uris,
         uint256 standardPrice,
-        address _paymentAddress
+        address _paymentAddress,
+        uint256 maxSupplyStandardType,
+        uint256 _maxMintPerMonth
     ) ERC721("Magic Moons", "MMOON") {
         momentOfDeployment = block.timestamp;
 
         settings.lunar = _lunaSource;
         settings.paymentAddress = _paymentAddress;
+        maxMintPerMonth = _maxMintPerMonth;
 
-        createSpecialType(uris, standardPrice, MAX_SUPPLY_STANDARD_TYPE); // make specialTypeIdToSpecialPhaseURIs[0] the default type
+        createSpecialType(uris, standardPrice, maxSupplyStandardType ); // make specialTypeIdToSpecialPhaseURIs[0] the default type
     }
 
     function liveSupplyOf(uint256 specialTypeId) public view returns (uint256) {
@@ -78,7 +80,7 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     }
     
     function mint(address to, uint256 specialTypeId) public payable {
-        require(numberOfMintsThisMonth[settings.lunar.numberOfSynodicMonthsSince(momentOfDeployment)] < MAX_MINT_PER_MONTH, "Minting limit reached please come back under the next Full Moon");
+        require(numberOfMintsThisMonth[settings.lunar.numberOfSynodicMonthsSince(momentOfDeployment)] < maxMintPerMonth, "Minting limit reached please come back under the next Full Moon");
         require(isValidSpecialTypeId[specialTypeId], "Special type does not exist");
         require(Strings.equal(settings.lunar.currentPhase(), "Full Moon"), "You can only mint under a Full Moon"); // for later  
         require(specialTypeIdToAmountMinted[specialTypeId] < specialTypeIdToSupply[specialTypeId], "Supply of this type has been exhausted");

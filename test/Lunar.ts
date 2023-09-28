@@ -3,6 +3,8 @@ import { ethers } from "hardhat";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import Chronos from "./Chronos";
 
+const MAX_SUPPLY_STANDARD_TYPE = 1000n;
+const MAX_MINT_PER_MONTH = 100n;
 
 describe("Lunar", async () => {
     let lunar: any;
@@ -11,7 +13,7 @@ describe("Lunar", async () => {
     let owner: any;
     const paymentAccount = ethers.Wallet.createRandom();
     let lunarAddress: string;
-    let chronos : Chronos; 
+    let chronos: Chronos;
 
     before(async () => {
         console.log(`Inside Before`)
@@ -56,6 +58,8 @@ describe("Lunar", async () => {
             ],
             ethers.parseEther("1"),
             paymentAccount.address,
+            MAX_SUPPLY_STANDARD_TYPE,
+            MAX_MINT_PER_MONTH
         ]);
 
         owner = await nftContract.owner();
@@ -227,6 +231,10 @@ describe("Lunar", async () => {
         expect(liveMintableAmountOfStandard_t2).to.equal(liveMintableAmountOfStandard_t1);
     })
 
+    it.skip("Only N tokens can be minted per month", async () => {
+
+    })
+
     it("Cannot mint tokens when it's not a full moon", async () => {
         currentPhase = await lunar.currentPhase();
 
@@ -237,10 +245,6 @@ describe("Lunar", async () => {
         }
         // try to mint standard token
         expect(nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") })).to.be.revertedWith("You can only mint under a Full Moon")
-    })
-
-    it.skip("Only N tokens can be minted per month", async () => {
-
     })
 
 });
