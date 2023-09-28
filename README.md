@@ -12,3 +12,5 @@ Special Type Id - This references an index referencing the "version/mutation" of
 Supply - The supply of this token as a whole is limited only by the number of "special types" I create and the supply limit I set for each. However, the supply of each "special type" is limited to the amount specified when the special type is created. The supply of special types zero, or the standard version, will be specified at the time of deployment.
 
 Please note that I do plan on adding more special types in the future.
+
+Minting Policy - tokens can only be minted under a full moon. Only N per moon. 

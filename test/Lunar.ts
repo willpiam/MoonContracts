@@ -1,6 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
+import Chronos from "./Chronos";
+
 
 describe("Lunar", async () => {
     let lunar: any;
@@ -9,6 +11,7 @@ describe("Lunar", async () => {
     let owner: any;
     const paymentAccount = ethers.Wallet.createRandom();
     let lunarAddress: string;
+    let chronos : Chronos; 
 
     before(async () => {
         console.log(`Inside Before`)
@@ -16,14 +19,8 @@ describe("Lunar", async () => {
         await lunar.waitForDeployment();
 
         // make sure the blockchain thinks its currently a new moon
-        currentPhase = await lunar.currentPhase();
-
-        while (currentPhase !== "Full Moon") {
-            await time.increase(60 * 60 * 24); // increase time by 1 day
-            currentPhase = await lunar.currentPhase();
-
-            console.log(`Current phase: ${currentPhase}`);
-        }
+        chronos = new Chronos(lunar);
+        await chronos.advanceToNextFullMoon();
 
         console.log(`We've arrived at the next Full Moon! Ta-da!`)
     });
@@ -233,18 +230,17 @@ describe("Lunar", async () => {
     it("Cannot mint tokens when it's not a full moon", async () => {
         currentPhase = await lunar.currentPhase();
 
-        while (currentPhase === "Full Moon") {
-            await time.increase(60 * 60 * 24); // increase time by 1 day
-            currentPhase = await lunar.currentPhase();
-
-            console.log(`Current phase: ${currentPhase}`);
+        if (currentPhase === "Full Moon") {
+            console.log(`Moving passed the full moon!`)
+            await chronos.advanceToNextPhase();
+            console.log(`Moved passed the full moon! Minting should now be disabled.`)
         }
-
-        console.log(`Moved passed the full moon! Minting should now be disabled.`)
-
         // try to mint standard token
         expect(nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") })).to.be.revertedWith("You can only mint under a Full Moon")
     })
 
+    it.skip("Only N tokens can be minted per month", async () => {
+
+    })
 
 });

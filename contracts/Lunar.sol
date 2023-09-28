@@ -104,6 +104,10 @@ contract Lunar is ILunar {
         return ((block.timestamp - referenceNewMoon) * 1 gwei) / synodicMonth;
     }
 
+    function numberOfSynodicMonthsSince(uint256 moment) public view returns (uint256) {
+        return ((block.timestamp - moment) * 1 gwei) / synodicMonth;
+    }
+
     function currentFrac() public view returns (uint256) {
         return _currentFrac(block.timestamp);
     }

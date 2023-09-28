@@ -6,4 +6,5 @@ interface ILunar {
     function currentPhase() external view returns (string memory);
     function numberOfSynodicMonthsSinceReferenceNewMoon() external view returns (uint256);
     function synodicMonth() external view returns (uint256);
+    function numberOfSynodicMonthsSince(uint256 moment) external view returns (uint256);
 }
