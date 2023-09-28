@@ -1,5 +1,7 @@
 # William Doyle's Lunar Contracts 
 
+https://moon.williamdoyle.ca/
+
 ## Description
 
 This is an NFT project all about the moon. Each token will display the current phase of the moon based on ON CHAIN data. 
@@ -14,3 +16,11 @@ Supply - The supply of this token as a whole is limited only by the number of "s
 Please note that I do plan on adding more special types in the future.
 
 Minting Policy - tokens can only be minted under a full moon. Only N per moon. 
+
+# TODO
+
+## Interface
+
+1. Display the current phase of the moon using a public RPC instead of metamask .. so the site can be used just to check the current phase of the moon.
+2. Add a way for me to withdraw from the escrow using the interface.
+3. Allow users to specify the recipient address, they may not want to receive the token at the address they are using to interact with the site. But this option should be hidden by default.

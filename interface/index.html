@@ -18,13 +18,14 @@
       padding: 20px;
     }
 
-    #mint-area {
+    .area {
       background-color: #ffffff;
       border-radius: 8px;
       padding: 20px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       text-align: center;
       margin-top: 20px;
+      margin-bottom: 20px;
     }
 
     #mint-button {
@@ -59,9 +60,14 @@
   <h1>Lunar Contracts</h1>
   <div id="phase-display"></div>
   <!-- <button id="mint-button" disabled>Mint</button> -->
-  <div id="mint-area">
+  <div class="area" id="mint-area">
     <button id="mint-button">Mint</button>
     <div id="version-0-price-display"></div>
+  </div>
+  <div id="token-amount-display"></div>
+  <div class="area" id="token-view-area">
+    <h2>Your Tokens</h2>
+    <div id="tokens-view"></div>
   </div>
 
 
@@ -1156,6 +1162,53 @@
     // Call the function to set the phase on page load
     setPhase()
     getPrice(0)
+
+    const loadTokens = async () => {
+      try {
+        const nftContract = await getNftContract();
+
+        const amountOwned = await nftContract.balanceOf(nftContract.signer.getAddress());
+        const amountOwnedNumber = parseInt(amountOwned.toString());
+
+        console.log('Amount owned:', amountOwned.toString());
+        document.getElementById('token-amount-display').innerText = `You own ${amountOwned.toString()} token ${amountOwnedNumber > 1 ? 's' : ''}`;
+
+        const tokensView = document.getElementById('tokens-view');
+
+        const tokens = await Promise.all(Array.from({ length: amountOwnedNumber }, (v, i) => { })
+          .map(async (element, index) => {
+            const tokenId = await nftContract.tokenOfOwnerByIndex(nftContract.signer.getAddress(), index);
+            const tokenUri = await nftContract.tokenURI(tokenId);
+            const metadata = await fetch(`https://copper-tropical-koala-436.mypinata.cloud/ipfs/${tokenUri}`).then(response => response.json());
+            const image = `https://copper-tropical-koala-436.mypinata.cloud/ipfs/${metadata.image}`
+
+            // add a new child of class "tokens-view" with the calls "token-view" and the id "token-view-${tokenId}"
+            const tokenDiv = document.createElement('div');
+            const tokenImage = document.createElement('img');
+
+            tokenImage.src = image;  // Assuming imageURL is a property of your token object
+            tokenDiv.appendChild(tokenImage);
+            tokensView.appendChild(tokenDiv);
+
+            return {
+              tokenId: tokenId,
+              uri: tokenUri,
+              metadata: metadata,
+              image: image,
+            }
+          }))
+
+
+        console.log('Tokens:', tokens)
+
+      }
+      catch (error) {
+        console.error('Error fetching tokens:', error);
+      }
+
+    }
+
+    loadTokens()
 
   </script>
 </body>
