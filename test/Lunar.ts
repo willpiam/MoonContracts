@@ -146,7 +146,7 @@ describe("Lunar", async () => {
         await nftContract.mint(owner, 2, { value: ethers.parseEther("3") });
 
         // expect the next mint call to fail
-        expect(nftContract.mint(owner, 2, { value: ethers.parseEther("3") })).to.be.revertedWith("Supply of this type has been exhausted")
+        await expect(nftContract.mint(owner, 2, { value: ethers.parseEther("3") })).to.be.revertedWith("Supply of this type has been exhausted")
     })
 
     it("Payment address can withdraw funds", async () => {
@@ -250,7 +250,7 @@ describe("Lunar", async () => {
             console.log(`Moved passed the full moon! Minting should now be disabled.`)
         }
         // try to mint standard token
-        expect(nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") })).to.be.revertedWith("You can only mint under a Full Moon")
+        await expect(nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") })).to.be.revertedWith("You can only mint under a Full Moon")
     })
 
 });
