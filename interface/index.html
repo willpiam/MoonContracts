@@ -2,39 +2,87 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="keywords" content="">
-    <meta name="author" content="">
-    <title>Lunar Contracts</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="author" content="">
+  <title>Lunar Contracts</title>
 
-    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="application/javascript"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="application/javascript"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+
+    #mint-area {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #mint-button {
+      background-color: #2c3e50;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #mint-button:disabled {
+      background-color: #7f8c8d;
+      cursor: not-allowed;
+    }
+
+    #mint-button:hover:not(:disabled) {
+      background-color: #1abc9c;
+    }
+
+    #version-0-price-display {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
 </head>
 
 <body>
 
-    <h1>Lunar Contracts</h1>
-    <div id="phase-display"></div>
-
-    <script type="module">
-        if (typeof window.ethereum !== 'undefined') {
-            console.log('MetaMask is installed!');
-        }
-
-        async function connectAccount() {
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: `0x${(11155111).toString(16)}` }]
-            }).catch(async (error) => {
-                console.log(`Error: Could not switch to chain `)
-                return
-            })
-        }
+  <h1>Lunar Contracts</h1>
+  <div id="phase-display"></div>
+  <!-- <button id="mint-button" disabled>Mint</button> -->
+  <div id="mint-area">
+    <button id="mint-button">Mint</button>
+    <div id="version-0-price-display"></div>
+  </div>
 
 
-        const lunarAbi = `[
+  <script type="module">
+    if (typeof window.ethereum !== 'undefined') {
+      console.log('MetaMask is installed!');
+    }
+
+    async function connectAccount() {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${(11155111).toString(16)}` }]
+      }).catch(async (error) => {
+        console.log(`Error: Could not switch to chain `)
+        return
+      })
+    }
+
+
+    const lunarAbi = `[
     {
       "inputs": [],
       "stateMutability": "nonpayable",
@@ -286,10 +334,10 @@
       "type": "function"
     }
   ]`
-        const lunarAddress = `0xE20d38b02f0C5578EEC2a62192ba7bF14351A64c`;
-        const nftAddress = `0x94b7D7E55A24439a34707440C32C0e3d6d32836a`;
+    const lunarAddress = '0xf1D7f4b6648a92092F7147dEe2be66C5529D5e6c';
+    const nftAddress = '0xF8E3B1FD800be79515d53261114dcbE16f099429';
 
-        const nftAbi = ` [
+    const nftAbi = ` [
     {
       "inputs": [
         {
@@ -1052,36 +1100,64 @@
     }
   ]`
 
-        const getContract = async (contractAddrress, abi) => {
-            await connectAccount();
+    const getContract = async (contractAddrress, abi) => {
+      await connectAccount();
 
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            console.log(signer);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      console.log(signer);
 
-            return new ethers.Contract(contractAddrress, abi, signer);
-        }
+      return new ethers.Contract(contractAddrress, abi, signer);
+    }
 
-        const getLunarContract = getContract.bind(null, lunarAddress, lunarAbi);
-        const getNftContract = getContract.bind(null, nftAddress, nftAbi);
+    const getLunarContract = getContract.bind(null, lunarAddress, lunarAbi);
+    const getNftContract = getContract.bind(null, nftAddress, nftAbi);
 
-        const setPhase = async () => {
-            const lunarContract = await getLunarContract();
+    const getPrice = async (specialTypeId) => {
+      const nftContract = await getNftContract();
+      const price = await nftContract.specialTypeIdToPrice(specialTypeId);
+      console.log('Price:', price.toString());
+      const priceInEth = ethers.utils.formatEther(price);
+      console.log('Price:', priceInEth);
+      document.getElementById('version-0-price-display').innerText = `₳ ${priceInEth}`; // ₳  Ξ
+      return price;
+    }
 
-            try {
-                const phase = await lunarContract.currentPhase();
-                console.log('Current phase:', phase)
-                document.getElementById('phase-display').innerText = phase;
-            } catch (error) {
-                console.error('Error fetching phase:', error);
-            }
-        };
+    const mint = async () => {
+      console.log(`About to attempt minting`)
+      try {
+        const nftContract = await getNftContract();
+        // Assume mint is the method to call for minting in your smart contract
+        const specialTypeId = 0;
+        const price = await getPrice(specialTypeId);
+        const mintTx = await nftContract.mint(nftContract.signer.getAddress(), specialTypeId, { value: price });
+        await mintTx.wait();
+        console.log('Minted successfully');
+      } catch (error) {
+        console.error('Error minting:', error);
+      }
+    };
 
-        // Call the function to set the phase on page load
-        setPhase();
+    const mintButton = document.getElementById('mint-button');
+    mintButton.addEventListener('click', mint);
 
+    const setPhase = async () => {
+      const lunarContract = await getLunarContract();
 
-    </script>
+      try {
+        const phase = await lunarContract.currentPhase();
+        console.log('Current phase:', phase)
+        document.getElementById('phase-display').innerText = `Current Lunar Phase: ${phase}`;
+      } catch (error) {
+        console.error('Error fetching phase:', error);
+      }
+    };
+
+    // Call the function to set the phase on page load
+    setPhase()
+    getPrice(0)
+
+  </script>
 </body>
 
 </html>
