@@ -4,7 +4,7 @@ import { time } from "@nomicfoundation/hardhat-network-helpers";
 import Chronos from "./Chronos";
 
 const MAX_SUPPLY_STANDARD_TYPE = 1000n;
-const MAX_MINT_PER_MONTH = 100n;
+const MAX_MINT_PER_MONTH = 10n;
 
 describe("Lunar", async () => {
     let lunar: any;
@@ -231,8 +231,14 @@ describe("Lunar", async () => {
         expect(liveMintableAmountOfStandard_t2).to.equal(liveMintableAmountOfStandard_t1);
     })
 
-    it.skip("Only N tokens can be minted per month", async () => {
+    it("Only N tokens can be minted per month", async () => {
+        await nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") });
+        await nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") });
+        await nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") });
+        await nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") });
 
+        // this next one will fail because it goes over the monthly limit
+        await expect( nftContract.mint(owner, 0, { value: ethers.parseEther("1.1") })).to.be.revertedWith("Minting limit reached please come back under the next Full Moon")
     })
 
     it("Cannot mint tokens when it's not a full moon", async () => {
