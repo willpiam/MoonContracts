@@ -31,9 +31,9 @@ contract LunarTokens is ERC721, ERC721Enumerable, ERC721Burnable, Ownable, PullP
     mapping(uint256 => uint256) public numberOfMintsThisMonth;
 
     Settings public settings;
-    uint256 private momentOfDeployment;
+    uint256 private immutable momentOfDeployment;
 
-    uint256 private maxMintPerMonth;
+    uint256 private immutable maxMintPerMonth;
 
     event SettingsChanged();
     event PriceChanged(uint256 specialTypeId);
