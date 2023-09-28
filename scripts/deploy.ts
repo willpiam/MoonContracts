@@ -44,9 +44,9 @@ async function main() {
 
   console.log(`NFT Contract deployed to: ${nftContractAddress}`);
 
-  const owner = await nftContract.owner();
+  // const owner = await nftContract.owner();
 
-  console.log(`NFT Contract owner: ${owner}`);
+  // console.log(`NFT Contract owner: ${owner}`);
 
   // mint one into my account
   // await nftContract.mint(`0xd90f7Fb941829CFE7Fc50eD235d1Efac05c58190`, 0);

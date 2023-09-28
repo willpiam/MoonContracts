@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <title>Document</title>
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.min.js"></script> -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="application/javascript"></script>
+</head>
+
+<body>
+
+    <!-- Your content goes here -->
+    <h1>Lunar Contracts</h1>
+    <!-- div here to display text with current phase -->
+    <div id="phase-display"></div>
+
+    <script type="module">
+        // Your JavaScript code goes here
+        // const { ethers } = window;  // Access ethers from window object
+        //  import { ethers } from "http://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
+
+        if (typeof window.ethereum !== 'undefined') {
+            console.log('MetaMask is installed!');
+        }
+
+        async function connectAccount() {
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: `0x${(11155111).toString(16)}` }]
+            }).then(() => {
+                // Enable the input field upon successful connection
+                document.getElementById('addressInput').disabled = false;
+            }).catch(async (error) => {
+                console.log(`Error: Could not switch to chain `)
+                return
+            })
+        }
+
+        // const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/polygon_mumbai");
+
+        const lunarAbi = `[
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256[8]",
+          "name": "_phaseCutoffs",
+          "type": "uint256[8]"
+        }
+      ],
+      "name": "SetPhaseCutoffs",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_newMoon",
+          "type": "uint256"
+        }
+      ],
+      "name": "SetReferenceNewMoon",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_synodicMonth",
+          "type": "uint256"
+        }
+      ],
+      "name": "SetSynodicMonth",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "TransferOwnership",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "currentFrac",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentPhase",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "moment",
+          "type": "uint256"
+        }
+      ],
+      "name": "numberOfSynodicMonthsSince",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "numberOfSynodicMonthsSinceReferenceNewMoon",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "phaseAtMoment",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "phaseCutoffs",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "referenceNewMoon",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "setOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[8]",
+          "name": "_phaseCutoffs",
+          "type": "uint256[8]"
+        }
+      ],
+      "name": "setPhaseCutoffs",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_newMoon",
+          "type": "uint256"
+        }
+      ],
+      "name": "setReferenceNewMoon",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_synodicMonth",
+          "type": "uint256"
+        }
+      ],
+      "name": "setSynodicMonth",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "synodicMonth",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]` 
+        const lunarAddress = `0xE20d38b02f0C5578EEC2a62192ba7bF14351A64c`;
+        const nftAddress = `0x94b7D7E55A24439a34707440C32C0e3d6d32836a`;
+
+        const setPhase = async () => {
+            await connectAccount();
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            console.log(signer);
+
+            const lunarContract = new ethers.Contract(lunarAddress, lunarAbi, signer);
+            try {
+                const phase = await lunarContract.currentPhase();
+                console.log('Current phase:', phase)
+                document.getElementById('phase-display').innerText = phase;
+            } catch (error) {
+                console.error('Error fetching phase:', error);
+            }
+        };
+
+        // Call the function to set the phase on page load
+        setPhase();
+
+    </script>
+</body>
+
+</html>
