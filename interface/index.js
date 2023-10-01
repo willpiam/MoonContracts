@@ -1,43 +1,18 @@
-import nftAbi from "./nftAbi.js";
-import lunarAbi from "./lunarAbi.js";
 import settings from "./settings.js";
+import { getLunarContract, getNftContract } from "./functions/getContract.js";
+import getPrice from "./functions/getPrice.js";
 
 if (typeof window.ethereum !== 'undefined') {
     console.log('MetaMask is installed!');
 }
 
-async function connectAccount() {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${(settings.networkID).toString(16)}` }]
-    }).catch(async (error) => {
-        console.log(`Error: Could not switch to chain `)
-        return
-    })
-}
 
-const getContract = async (contractAddrress, abi) => {
-    await connectAccount();
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    console.log(signer);
-
-    return new ethers.Contract(contractAddrress, abi, signer);
-}
-
-const getLunarContract = getContract.bind(null, settings.lunarAddress, lunarAbi);
-const getNftContract = getContract.bind(null, settings.nftAddress, nftAbi);
-
-const getPrice = async (specialTypeId) => {
-    const nftContract = await getNftContract();
-    const price = await nftContract.specialTypeIdToPrice(specialTypeId);
-    console.log('Price:', price.toString());
+const setPriceOnPage = (price) => {
     const priceInEth = ethers.utils.formatEther(price);
     console.log('Price:', priceInEth);
     document.getElementById('version-0-price-display').innerText = `₳ ${priceInEth}`; // ₳  Ξ
-    return price;
+    return price; 
 }
 
 const mint = async () => {
@@ -72,7 +47,8 @@ const setPhase = async () => {
 
 // Call the function to set the phase on page load
 setPhase()
-getPrice(0)
+// getPrice(0)
+getPrice(0).then(setPriceOnPage)
 
 const loadTokens = async () => {
     try {
