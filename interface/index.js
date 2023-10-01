@@ -7,6 +7,8 @@ import { setPhaseOnPage, setPriceOnPage, setOwnedTokensOnPage } from "./function
 
 if (typeof window.ethereum !== 'undefined')
     console.log('MetaMask is installed!');
+else 
+    alert('Please install MetaMask!');
 
 const mintButton = document.getElementById('mint-button');
 mintButton.addEventListener('click', mint);
@@ -20,6 +22,8 @@ getOwnedTokens().then(setOwnedTokensOnPage);
     const linksWrapper = document.getElementById('links-wrapper');
     const lunarContractLink = document.createElement('a');
     const nftContractLink = document.createElement('a');
+    const otherProjects = document.createElement('a');
+    const twitter = document.createElement('a');
 
     lunarContractLink.innerText = 'Lunar Contract';
     lunarContractLink.href = `${settings.explorerPrefix}address/${settings.lunarAddress}`;
@@ -31,12 +35,30 @@ getOwnedTokens().then(setOwnedTokensOnPage);
     nftContractLink.target = '_blank';
     nftContractLink.rel = 'noopener noreferrer';
 
+    otherProjects.innerText = 'projects.williamdoyle.ca';
+    otherProjects.href = 'https://projects.williamdoyle.ca';
+    otherProjects.target = '_blank';
+    otherProjects.rel = 'noopener noreferrer';
+
+    twitter.innerText = 'Twitter';
+    twitter.href = 'https://twitter.com/william00000010';
+    twitter.target = '_blank';
+    twitter.rel = 'noopener noreferrer';
+
     const lunarContractLinkWrapper = document.createElement('div');
     lunarContractLinkWrapper.appendChild(lunarContractLink);
 
     const nftContractLinkWrapper = document.createElement('div');
     nftContractLinkWrapper.appendChild(nftContractLink);
 
+    const otherProjectsWrapper = document.createElement('div');
+    otherProjectsWrapper.appendChild(otherProjects);
+
+    const twitterWrapper = document.createElement('div');
+    twitterWrapper.appendChild(twitter);
+
     linksWrapper.appendChild(lunarContractLinkWrapper);
     linksWrapper.appendChild(nftContractLinkWrapper);
+    linksWrapper.appendChild(otherProjectsWrapper);
+    linksWrapper.appendChild(twitterWrapper);
 }

@@ -13,11 +13,18 @@ const getContract = async (contractAddrress, abi) => {
     return new ethers.Contract(contractAddrress, abi, signer);
 }
 
+const getContractWithCustomProvider = async (contractAddrress, abi) => {
+    const provider = new ethers.providers.JsonRpcProvider(settings.customRPC); 
+    return new ethers.Contract(contractAddrress, abi, provider);
+}
+
 const getLunarContract = getContract.bind(null, settings.lunarAddress, lunarAbi);
+const getLunarContractWithCustomProvider = getContractWithCustomProvider.bind(null, settings.lunarAddress, lunarAbi);
 const getNftContract = getContract.bind(null, settings.nftAddress, nftAbi);
 
 export default getContract;
 export {
     getLunarContract,
+    getLunarContractWithCustomProvider,
     getNftContract,
 }

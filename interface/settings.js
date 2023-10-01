@@ -4,6 +4,7 @@ const settings = {
     nftAddress: '0xF8E3B1FD800be79515d53261114dcbE16f099429',
     metadataPrefix: `https://copper-tropical-koala-436.mypinata.cloud/ipfs/`,
     explorerPrefix: `https://sepolia.etherscan.io/`,
+    customRPC: `https://ethereum-sepolia.blockpi.network/v1/rpc/public`,
 }
 
 export default settings;

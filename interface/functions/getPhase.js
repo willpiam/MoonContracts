@@ -1,7 +1,9 @@
-import { getLunarContract } from "./getContract.js";
+import { getLunarContract , getLunarContractWithCustomProvider} from "./getContract.js";
 
 const getPhase = async () => {
-    const lunarContract = await getLunarContract();
+    console.log(`inside getPhase`)
+    // const lunarContract = await getLunarContract();
+    const lunarContract = await getLunarContractWithCustomProvider();
     const phase = await lunarContract.currentPhase();
     console.log('Current phase:', phase)
     return phase;
