@@ -22,8 +22,7 @@ Minting Policy - tokens can only be minted under a full moon. Only N per moon.
 ## Interface
 
 1. Display the current phase of the moon using a public RPC instead of metamask .. so the site can be used just to check the current phase of the moon.
-2. Add a way for me to withdraw from the escrow using the interface.
-3. Allow users to specify the recipient address, they may not want to receive the token at the address they are using to interact with the site. But this option should be hidden by default.
+2. Allow users to specify the recipient address, they may not want to receive the token at the address they are using to interact with the site. But this option should be hidden by default.
 
 ## Contract
 1. Deploy on milkomeda
