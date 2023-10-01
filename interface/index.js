@@ -1,53 +1,40 @@
 import settings from "./settings.js";
 import { getLunarContract, getNftContract } from "./functions/getContract.js";
 import getPrice from "./functions/getPrice.js";
+import mint from "./functions/mint.js";
 
 if (typeof window.ethereum !== 'undefined') {
     console.log('MetaMask is installed!');
 }
 
-
-
 const setPriceOnPage = (price) => {
     const priceInEth = ethers.utils.formatEther(price);
     console.log('Price:', priceInEth);
     document.getElementById('version-0-price-display').innerText = `₳ ${priceInEth}`; // ₳  Ξ
-    return price; 
+    return price;
 }
 
-const mint = async () => {
-    console.log(`About to attempt minting`)
-    try {
-        const nftContract = await getNftContract();
-        // Assume mint is the method to call for minting in your smart contract
-        const specialTypeId = 0;
-        const price = await getPrice(specialTypeId);
-        const mintTx = await nftContract.mint(nftContract.signer.getAddress(), specialTypeId, { value: price });
-        await mintTx.wait();
-        console.log('Minted successfully');
-    } catch (error) {
-        console.error('Error minting:', error);
-    }
-};
+
 
 const mintButton = document.getElementById('mint-button');
 mintButton.addEventListener('click', mint);
 
-const setPhase = async () => {
+const getPhase = async () => {
     const lunarContract = await getLunarContract();
+    const phase = await lunarContract.currentPhase();
+    console.log('Current phase:', phase)
+    return phase;
+}
 
-    try {
-        const phase = await lunarContract.currentPhase();
-        console.log('Current phase:', phase)
-        document.getElementById('phase-display').innerText = `Current Lunar Phase: ${phase}`;
-    } catch (error) {
-        console.error('Error fetching phase:', error);
-    }
+const setPhaseOnPage = (phase) => {
+    document.getElementById('phase-display').innerText = `Current Lunar Phase: ${phase}`;
+    return phase;
 };
 
-// Call the function to set the phase on page load
-setPhase()
-// getPrice(0)
+// query the current phase and set it on the page
+getPhase().then(setPhaseOnPage)
+
+// do the same for the price (0 represents standard version)
 getPrice(0).then(setPriceOnPage)
 
 const loadTokens = async () => {
